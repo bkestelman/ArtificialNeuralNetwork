@@ -1,5 +1,5 @@
 # ArtificialNeuralNetwork
-Image classifying ANN built from scratch
+Image classifying ANN built from scratch in C++
 
 Final Objective: Create and train and ANN that will take an image input (perhaps every tenth pixel or so) and classify it as either a 
 fruit or an animal. 
