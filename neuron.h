@@ -9,6 +9,7 @@ class neuron {
 	public:
 //		neuron();
 		neuron(const double& val, vector<neuron>& connections);
+		void initWeights();
 		void print();
 //		~neuron();
 	private:

@@ -19,18 +19,25 @@ int main() {
 	srand(time(NULL));
 	
 	vector<neuron> inputs;
-	vector<neuron> outputs;
+	//vector<neuron> outputs;
 	vector<neuron> hiddens;
 
 	double data[INPUTS];
 	initFruit(data, INPUTS);
 	print(data, INPUTS);
 
+	//set up neurons
 	for(int i = 0; i < INPUTS; i++) {
 		inputs.push_back(neuron(data[i], hiddens));
 	}
+	inputs[0].print();
 	for(int i = 0; i < HIDDENS; i++) {
-		hiddens.push_back(neuron(0, outputs));
+		hiddens.push_back(neuron(0, inputs));
+	}
+
+	//set up weights
+	for(auto& n : inputs) {
+		n.initWeights();
 	}
 
 	inputs[0].print();
