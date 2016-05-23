@@ -9,6 +9,7 @@ neuron::neuron(const double& val, vector<neuron>& connections) :connections{conn
 }
 
 void neuron::initWeights() {
+	weights.clear();
 	double sum = 0;
 	//initialize random weights from 0 to 1
 	for(int i = 0; i < connections.size(); i++) {
@@ -46,7 +47,7 @@ void neuron::adjustWeights() {
 		//w.numAdjustments++;
 		//cerr << "numAdjustments=" << w.numAdjustments << endl;
 		currentWeights[i] = weights[i].val;
-		cerr << "Error between value and weights[" << i << "] = " << std::abs(this->val - weights[i].pointsFromVal()) << endl;
+	//	cerr << "Error between value and weights[" << i << "] = " << std::abs(this->val - weights[i].pointsFromVal()) << endl;
 		weights[i].val *= (1 - std::abs(this->val - weights[i].pointsFromVal()));
 		sumNewWeights += weights[i].val;
 
