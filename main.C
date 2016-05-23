@@ -17,7 +17,7 @@ void print(double *arr, int sz); //print all the elements of an array, space sep
 void processLayer(vector<neuron> layer); //process the inputs going into each neuron in layer (multiply them by their weights and take the average)
 void initializeNetwork(vector<neuron>& inputs, vector<neuron>& hiddens); //initialize network of neurons with input layer and one hidden layer. Neuron values initialized to 0. 
 void setInputs(vector<neuron>& inputs, double *data, int sz); 
-void processNetwork(vector<neuron>& inputs, vector<neuron>& hiddens); //attempt to recreate inputs by processing through weights and hidden layer. Use error to adjust weights from hidden layer to output
+double processNetwork(vector<neuron>& inputs, vector<neuron>& hiddens); //attempt to recreate inputs by processing through weights and hidden layer. Use error to adjust weights from hidden layer to output. Returns the average error between recreation and inputs. 
 
 int main() {
 	srand(time(NULL));
@@ -28,12 +28,20 @@ int main() {
 
 	initializeNetwork(inputs, hiddens);
 
+//Training
+	double initialError = 0;
+	double error = 0;
 	double data[INPUTS];
-	initFruit(data, INPUTS);
-	setInputs(inputs, data, INPUTS);
-	print(data, INPUTS);
+	for(int i = 0; i < 1000; i++) {
+		initFruit(data, INPUTS);
+		setInputs(inputs, data, INPUTS);
+		print(data, INPUTS);
 
-	processNetwork(inputs, hiddens);
+		error = processNetwork(inputs, hiddens);
+		cout << "Error: " << error << endl << endl;
+		if(i == 0) initialError = error;
+	}
+	cout << "Initial error: " << initialError << endl;
 
 /*
 	//set up neurons
@@ -145,7 +153,7 @@ void setInputs(vector<neuron>& inputs, double *data, int sz) {
 	}
 }
 
-void processNetwork(vector<neuron>& inputs, vector<neuron>& hiddens) {
+double processNetwork(vector<neuron>& inputs, vector<neuron>& hiddens) {
 	cout << "Processing from inputs to hiddens (and changing values of hiddens)" << endl;
 	for(auto& h : hiddens) {
 		h.val = h.process();	
@@ -153,13 +161,16 @@ void processNetwork(vector<neuron>& inputs, vector<neuron>& hiddens) {
 	}
 	cout << "Processing from hiddens to inputs (without changing values of inputs), calculating error, and adjusting weights from hiddens to inputs" << endl;
 	int i = 0;
+	double error = 0;
 	for(auto& n : inputs) {
 		double result = n.process();
 		cout << "Result " << i++ << ": " << result << endl; //error is abs(n.process() - n.val)
+		error += std::abs(result - n.val); //going to divide by inputs.size() later to get average error
 		cout << "Neuron before weight adjustment: " << endl;
 		n.print();
 		n.adjustWeights(); //adjust weights pointing to n
 		cout << "Neuron after weight adjustment: " << endl;
 		n.print();
 	}
+	return error / inputs.size();
 }
