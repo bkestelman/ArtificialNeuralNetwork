@@ -5,13 +5,14 @@ class neuron;
 
 class weight {
 	public:
-//		weight();
-		weight(const double& val);
 		double val;
+//		weight();
+		weight(const double& val, neuron& pointsFrom, neuron& pointsTo);
+		double process();
 //		~weight();
 	private:
-//		neuron &pointsFrom;
-//		neuron &pointsTo;
+		neuron &pointsFrom;
+		neuron &pointsTo;
 };
 
 #endif

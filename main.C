@@ -14,6 +14,7 @@ using std::endl;
 void initRand(double *arr, int sz); //initiates normalized (between 0 and 1) random data in *arr
 void initFruit(double *arr, int sz); //initializes a "fruit" in *arr (a fruit is a set of data such that all the data points are relatively close) 
 void print(double *arr, int sz); //print all the elements of an array, space separated
+void processLayer(vector<neuron> layer); //multiply the data in each neuron of layer by their weights, and add up the results going to the same connections
 
 int main() {
 	srand(time(NULL));
@@ -27,20 +28,45 @@ int main() {
 	print(data, INPUTS);
 
 	//set up neurons
+	cout << "Initializing inputs" << endl;
 	for(int i = 0; i < INPUTS; i++) {
 		inputs.push_back(neuron(data[i], hiddens));
+		inputs[i].print();
 	}
-	inputs[0].print();
+	//inputs[0].print();
+	cout << "Initializing hiddens" << endl;
 	for(int i = 0; i < HIDDENS; i++) {
 		hiddens.push_back(neuron(0, inputs));
+		hiddens[i].print();
 	}
 
 	//set up weights
+	cout << "Initializing weights from inputs to hiddens" << endl;
+	for(auto& h : hiddens) {
+		h.initWeights();
+		h.print();
+	}
+	cout << "Initializing weights from hiddens to inputs" << endl;
 	for(auto& n : inputs) {
 		n.initWeights();
+		n.print();
 	}
 
-	inputs[0].print();
+	//inputs[0].print();
+
+	//process from inputs to hiddens
+	cout << "Processing from inputs to hiddens (and changing values of hiddens)" << endl;
+	for(auto& h : hiddens) {
+		h.val = h.process();	
+		h.print();
+	}
+	cout << "Processing from hiddens to inputs (without changing values of inputs)" << endl;
+	int i = 0;
+	for(auto& n : inputs) {
+		cout << "Result " << i++ << ": " << n.process() << " ";
+		n.print();
+	}
+//	inputs[0].print();
 }
 
 void initRand(double *arr, int sz) {
@@ -64,4 +90,10 @@ void print(double *arr, int sz) {
 		cout << arr[i] << " ";
 	}
 	cout << endl;
+}
+
+void processLayer(vector<neuron> layer) {
+	for(auto& n : layer) {
+		n.process();
+	}
 }

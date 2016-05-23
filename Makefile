@@ -6,3 +6,6 @@ neuron.o: weight.h neuron.h neuron.C
 	g++ $(CFLAGS) -c weight.h neuron.h neuron.C
 weight.o: weight.h neuron.h weight.C
 	g++ $(CFLAGS) -c weight.h neuron.h weight.C
+
+clean: 
+	rm *.o
