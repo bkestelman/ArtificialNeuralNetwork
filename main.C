@@ -14,7 +14,7 @@ using std::endl;
 void initRand(double *arr, int sz); //initiates normalized (between 0 and 1) random data in *arr
 void initFruit(double *arr, int sz); //initializes a "fruit" in *arr (a fruit is a set of data such that all the data points are relatively close) 
 void print(double *arr, int sz); //print all the elements of an array, space separated
-void processLayer(vector<neuron> layer); //multiply the data in each neuron of layer by their weights, and add up the results going to the same connections
+void processLayer(vector<neuron> layer); //process the inputs going into each neuron in layer (multiply them by their weights and take the average)
 
 int main() {
 	srand(time(NULL));
@@ -60,10 +60,15 @@ int main() {
 		h.val = h.process();	
 		h.print();
 	}
-	cout << "Processing from hiddens to inputs (without changing values of inputs)" << endl;
+	cout << "Processing from hiddens to inputs (without changing values of inputs), calculating error, and adjusting weights from hiddens to inputs" << endl;
 	int i = 0;
 	for(auto& n : inputs) {
-		cout << "Result " << i++ << ": " << n.process() << " ";
+		double result = n.process();
+		cout << "Result " << i++ << ": " << result << endl; //error is abs(n.process() - n.val)
+		cout << "Neuron before weight adjustment: " << endl;
+		n.print();
+		n.adjustWeights(); //adjust weights pointing to n
+		cout << "Neuron after weight adjustment: " << endl;
 		n.print();
 	}
 //	inputs[0].print();

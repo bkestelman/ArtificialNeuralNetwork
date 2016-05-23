@@ -12,6 +12,7 @@ class neuron {
 		neuron(const double& val, vector<neuron>& connections);
 		void initWeights(); //initialize weights to random values. Sum of weights will be 1
 		double process(); //process incoming signals. Multiply incoming values by their weights and calculate the average
+		void adjustWeights(); //calculates error of each connection compared to this neuron's value and adjusts weights from each connection according to the error
 		void print();
 //		~neuron();
 	private:
