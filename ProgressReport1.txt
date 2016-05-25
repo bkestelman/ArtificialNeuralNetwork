@@ -1,0 +1,35 @@
+Progress and Next Steps:
+
+I've downloaded 47 images of fruits by copying the html source from a Yahoo! fruits image search into a local text file, isolating image 
+links (beginning in https and ending in jpg) one per line using sed (also had to eliminate backslashes in the links), removed duplicate 
+links with the perl script I posted, inserted a wget before each link, and ran the file. The Yahoo! source apparently has a large size 
+and a small size for many of the files, so it's a good idea to eliminate the large ones (denoted by a _b near the end of the link, 
+compared with an identical link denoted _n). Finally, used imagemagick to resize all the images to 200x200. The command is: 
+mogrify '*.jpg[200x200!]"
+mogrify is like imagemagick's convert command, but defaults to modifying each file in place, instead of requiring some output file. 
+[200x200!] indicates the desired transformation, and the exclamation mark forces it to be exactly as specified (despite losing the 
+original aspect ratio). 
+
+47 images is not nearly enough, but at this point, the process of bulk image downloading should be much smoother. Google's source from 
+an image search also works, but the first bunch of images are google icons. 
+
+C++ does not come with a standard library for image processing, so I'm looking into the CImg library, which seems to be the simplest one 
+out there (other options are libpng and openCV). The plan now is to read pixel data from ~1000 fruit images to train the RBM. Read pixel 
+data from ~1000 animal images to train a separate RBM. Then give both of them data from a new image and see which has the smallest error 
+in reproducing it. 
+
+Another interesting note, it turns out increasing the number of hidden nodes from 2 to 4 (while keeping 4 input nodes) increases the 
+improvement of the RBM over 10,000 runs to something like 3.4%, and increasing the number of hidden nodes to 6 bumps it up to 3.8%. With 
+8 hidden nodes, the improvement is 4.4%. Beyond that, the improvement plateaus; with 20 hidden nodes, it's 4.7%. This is very interesting,
+and I suspect is simply because more hidden nodes means more choices for the output, so it can gradually optimize a better result, than 
+from only two options. 
+
+Next steps:
+Download more images
+Learn how to read pixel data using the CImg library (check out their manual if you're interested, ask me if you have trouble getting 
+their hello world example to compile)
+Implement weight adjustment for the weights from inputs to hidden nodes (this is important!)
+Make the program more user-friendly. The user should be prompted on the size of the neural network, the number of tests to run, etc. 
+Run more tests. Haven't tried a larger input size yet. Also would be worth trying an implementation using the square of the error when 
+calculating weight adjustments, but careful thought is required to ensure all the weights leading to a node still add up to 1 (though 
+shouldn't be too difficult). 
