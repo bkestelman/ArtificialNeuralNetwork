@@ -9,8 +9,8 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-#define INPUTS 4
-#define HIDDENS 12
+#define INPUTS 4 //number of input nodes
+#define HIDDENS 2 //number of hidden nodes
 
 void initRand(double *arr, int sz); //initiates normalized (between 0 and 1) random data in *arr
 void initFruit(double *arr, int sz); //initializes a "fruit" in *arr (a fruit is a set of data such that all the data points are relatively close) 
@@ -39,6 +39,7 @@ int main() {
 	double errSumTenK = 0;
 	double error = 0;
 	double data[INPUTS];
+	//to play around with one ANN, get rid of these loops, uncomment some useful couts in this file, and use the print functions here and in neuron.C
 	for(int j = 0; j < 1000; j++) {
 		fruitsRBM.initializeNetwork();
 		for(int i = 0; i < 1000; i++) {
