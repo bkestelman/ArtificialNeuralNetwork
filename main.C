@@ -1,3 +1,4 @@
+#include "ANN.h"
 #include "neuron.h"
 #include "weight.h"
 #include <random>
@@ -9,7 +10,7 @@ using std::cerr;
 using std::endl;
 
 #define INPUTS 4
-#define HIDDENS 2
+#define HIDDENS 12
 
 void initRand(double *arr, int sz); //initiates normalized (between 0 and 1) random data in *arr
 void initFruit(double *arr, int sz); //initializes a "fruit" in *arr (a fruit is a set of data such that all the data points are relatively close) 
@@ -21,6 +22,9 @@ double processNetwork(vector<neuron>& inputs, vector<neuron>& hiddens); //attemp
 
 int main() {
 	srand(time(NULL));
+
+	ANN fruitsRBM(INPUTS, HIDDENS);
+	//fruitsRBM.initializeNetwork();
 	
 	vector<neuron> inputs;
 	//vector<neuron> outputs;
@@ -36,20 +40,20 @@ int main() {
 	double error = 0;
 	double data[INPUTS];
 	for(int j = 0; j < 1000; j++) {
-		initializeNetwork(inputs, hiddens);
-	for(int i = 0; i < 10000; i++) {
-		initFruit(data, INPUTS);
-		setInputs(inputs, data, INPUTS);
-	//	print(data, INPUTS);
+		fruitsRBM.initializeNetwork();
+		for(int i = 0; i < 1000; i++) {
+			initFruit(data, INPUTS);
+			fruitsRBM.setInputs(data, INPUTS);
+		//	print(data, INPUTS);
 
-		error = processNetwork(inputs, hiddens);
-		//cout << "Error: " << error << endl << endl;
-		if(i == 0) initialError = error;
-		if(i < 10) errSumTen += error;
-		if(i < 100) errSumHun += error;
-		if(i < 1000) errSumK += error;
-		if(i < 10000) errSumTenK += error;
-	}
+			error = fruitsRBM.processNetwork();
+			//cout << "Error: " << error << endl << endl;
+			if(i == 0) initialError = error;
+			if(i < 10) errSumTen += error;
+			if(i < 100) errSumHun += error;
+			if(i < 1000) errSumK += error;
+			if(i < 10000) errSumTenK += error;
+		}
 	}
 //	initRand(data, INPUTS);
 //	setInputs(inputs, data, INPUTS);
