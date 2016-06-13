@@ -1,8 +1,11 @@
 #include "ANN.h"
 #include <iostream>
 #include <cmath>
+using std::cout;
+using std::cerr;
+using std::endl;
 
-ANN::ANN(int inputs, int hiddens) :inputs{inputs}, hiddens{hiddens} {}
+ANN::ANN(int inputs, int hiddens, std::string id) :inputs{inputs}, hiddens{hiddens}, id{id} {}
 
 void ANN::initializeNetwork() {
 	inputL.clear();
@@ -32,13 +35,16 @@ void ANN::initializeNetwork() {
 }
 
 void ANN::setInputs(double *data, int sz) {
-	if(sz != inputs) std::cerr << "ERROR: data and inputs size mismatch" << std::endl; //should make this throw an exception
+	if(sz != inputs) {
+		std::cerr << "ERROR: data and inputs size mismatch" << std::endl; //should make this throw an exception
+		return;
+	}
 	for(int i = 0; i < sz; i++) {
 		inputL[i].val = data[i];
 	}
 }
 
-double ANN::processNetwork() {
+double ANN::processNetwork(bool adjust_weights) {
 	//cout << "Processing from inputs to hiddens (and changing values of hiddens)" << endl;
 	for(auto& h : hiddenL) {
 		h.val = h.process(); //store the weighted average of inputs pointing to h
@@ -53,9 +59,46 @@ double ANN::processNetwork() {
 		error += std::abs(result - n.val); //going to divide by inputs.size() later to get average error
 		//cout << "Neuron before weight adjustment: " << endl;
 		//n.print();
-		n.adjustWeights(); //adjust weights pointing to n
+		if(adjust_weights) n.adjustWeights(); //adjust weights pointing to n
 		//cout << "Neuron after weight adjustment: " << endl;
 		//n.print();
 	}
 	return error / inputL.size();
 }
+
+void ANN::printANN(bool show_node_values, bool show_weights) {
+	cout << "ANN ID: " << id << endl;
+	cout << "Inputs: " << inputs << "\tHiddens: " << hiddens << endl;
+	if(!show_node_values) return;
+	int i = 0; 
+	int j = 0;
+	for(auto& n : inputL) {
+		cout << "Input[" << i << "] value: " << n.val << endl;
+		if(!show_weights) {
+			i++;
+			continue;
+		}
+		for(auto& w : n.weights) { 
+			cout << "\tWeight[" << i << "][" << j++ << "]: " << w.val << endl;
+		}
+		i++;
+		j = 0;
+	}
+	i = 0;
+	for(auto& h : hiddenL) {
+		cout << "Hidden[" << i << "] value: " << h.val << endl;
+		if(!show_weights) {
+			i++;
+			continue;
+		}
+		for(auto& w : h.weights) { 
+			cout << "\tWeight[" << i << "][" << j++ << "]: " << w.val << endl;
+		}
+		i++;
+		j = 0;
+	}
+}
+
+/*void printANN(void) {
+	printANN(true);
+}*/

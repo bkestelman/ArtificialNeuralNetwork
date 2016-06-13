@@ -4,70 +4,87 @@
 #include <random>
 #include <vector>
 #include <iostream>
+#include <glob.h>
+#include "/root/CImg/CImg-1.7.2_pre052316/CImg.h" //replace with local path to CImg.h
+using namespace cimg_library;
 using std::vector;
 using std::cout;
+using std::cin;
 using std::cerr;
 using std::endl;
-
-#define INPUTS 4 //number of input nodes
-#define HIDDENS 2 //number of hidden nodes
 
 void initRand(double *arr, int sz); //initiates normalized (between 0 and 1) random data in *arr
 void initFruit(double *arr, int sz); //initializes a "fruit" in *arr (a fruit is a set of data such that all the data points are relatively close) 
 void print(double *arr, int sz); //print all the elements of an array, space separated
-void processLayer(vector<neuron> layer); //process the inputs going into each neuron in layer (multiply them by their weights and take the average)
-void initializeNetwork(vector<neuron>& inputs, vector<neuron>& hiddens); //initialize network of neurons with input layer and one hidden layer. Neuron values initialized to 0. 
-void setInputs(vector<neuron>& inputs, double *data, int sz); 
-double processNetwork(vector<neuron>& inputs, vector<neuron>& hiddens); //attempt to recreate inputs by processing through weights and hidden layer. Use error to adjust weights from hidden layer to output. Returns the average error between recreation and inputs. 
+void printMenu(); //prints menu of options for user 
+ANN createANN();
 
 int main() {
 	srand(time(NULL));
 
-	ANN fruitsRBM(INPUTS, HIDDENS);
-	//fruitsRBM.initializeNetwork();
-	
-	vector<neuron> inputs;
-	//vector<neuron> outputs;
-	vector<neuron> hiddens;
-
-
-//Training
-	double initialError = 0;
-	double errSumTen = 0; 
-	double errSumHun = 0;
-	double errSumK = 0; 
-	double errSumTenK = 0;
-	double error = 0;
-	double data[INPUTS];
-	//to play around with one ANN, get rid of these loops, uncomment some useful couts in this file, and use the print functions here and in neuron.C
-	for(int j = 0; j < 1000; j++) {
-		fruitsRBM.initializeNetwork();
-		for(int i = 0; i < 1000; i++) {
-			initFruit(data, INPUTS);
-			fruitsRBM.setInputs(data, INPUTS);
-		//	print(data, INPUTS);
-
-			error = fruitsRBM.processNetwork();
-			//cout << "Error: " << error << endl << endl;
-			if(i == 0) initialError = error;
-			if(i < 10) errSumTen += error;
-			if(i < 100) errSumHun += error;
-			if(i < 1000) errSumK += error;
-			if(i < 10000) errSumTenK += error;
+	bool quit = false;
+	int option;
+	vector<ANN> anns;
+	while(!quit) {
+		cout << "What would you like to do?" << endl;
+		printMenu();
+		cin >> option;
+		switch(option) {
+			case 1: 
+				anns.push_back(createANN());
+				break;
+			case 2: {
+				double fruit[anns[0].inputs]; 
+				initFruit(fruit, anns[0].inputs);
+				cout << "Fruit: ";
+				print(fruit, anns[0].inputs);
+				anns[0].setInputs(fruit, anns[0].inputs);
+				anns[0].processNetwork(true);
+				anns[0].printANN(true, true);
+				break;
+			}
+			case 3: {
+				glob_t fruitImages;
+				glob("images/fruits/training/*", 0, NULL, &fruitImages);
+				for(int im = 0; im < fruitImages.gl_pathc; im++) {
+					CImg<unsigned char> fruitImage(fruitImages.gl_pathv[im]);				
+					double pixels[anns[0].inputs];
+					int i = 0;
+					cimg_for(fruitImage, ptr, unsigned char) {
+						if(i < anns[0].inputs) pixels[i++] = (double)*ptr / 255;
+					}
+					anns[0].setInputs(pixels, anns[0].inputs);
+					anns[0].processNetwork(true);
+					anns[0].printANN(true, false);
+				}
+				break;
+			}
+			case 4: {
+				double meanErr = 0;
+				int numTests;
+				glob_t testImages;
+				glob("images/fruits/test/*", 0, NULL, &testImages);
+				for(numTests = 0; numTests < testImages.gl_pathc; numTests++) {
+					CImg<unsigned char> image(testImages.gl_pathv[numTests]);
+					double pixels[anns[0].inputs];
+					int i = 0;
+					cimg_for(image, ptr, unsigned char) {
+						if(i < anns[0].inputs) pixels[i++] = (double)*ptr / 255;
+					}
+					anns[0].setInputs(pixels, anns[0].inputs);
+					meanErr += anns[0].processNetwork(false);
+				}
+				meanErr /= numTests;
+				cout << "Mean error on tests is: " << meanErr << endl;
+				break;
+			}
+			case 5: 
+				quit = true;
+				break;
+			default:
+				break;
 		}
 	}
-//	initRand(data, INPUTS);
-//	setInputs(inputs, data, INPUTS);
-//	print(data, INPUTS);
-//	error = processNetwork(inputs, hiddens);
-//	//cout << "Error: " << error << endl << endl;
-	//cout << "Initial error: " << initialError << endl;
-
-	cout << "Average error (first 10 trials): " << errSumTen / 10000 << endl;
-	cout << "Average error (first 100 trials): " << errSumHun / 100000 << endl;
-	cout << "Average error (first 1000 trials): " << errSumK / 1000000 << endl;
-	cout << "Average error (first 10000 trials): " << errSumTenK / 10000000 << endl;
-	cout << "Difference between error in first 10 and error in first 1000: " << errSumTen/10000 - errSumK/1000000 << endl;
 }
 
 void initRand(double *arr, int sz) {
@@ -88,69 +105,34 @@ void initFruit(double *arr, int sz) {
 
 void print(double *arr, int sz) {
 	for(int i = 0; i < sz; i++) {
-		//cout << arr[i] << " ";
+		cout << arr[i] << " ";
 	}
-	//cout << endl;
+	cout << endl;
 }
 
-void processLayer(vector<neuron> layer) {
-	for(auto& n : layer) {
-		n.process();
-	}
+void printMenu() {
+	cout << "1) Create ANN (RBM)" << endl;
+	cout << "2) Feed fruit to selected ANN" << endl;
+	cout << "3) Feed fruit images training set to selected ANN" << endl;
+	cout << "4) Feed fruit images test set to selected ANN" << endl;
+	cout << "5) Quit" << endl;
 }
 
-void initializeNetwork(vector<neuron>& inputs, vector<neuron>& hiddens) {
-	inputs.clear();
-	hiddens.clear();
-	//cout << "Initializing inputs" << endl;
-	for(int i = 0; i < INPUTS; i++) {
-		inputs.push_back(neuron(0, hiddens));
-		//inputs[i].print();
-	}
-	//inputs[0].print();
-	//cout << "Initializing hiddens" << endl;
-	for(int i = 0; i < HIDDENS; i++) {
-		hiddens.push_back(neuron(0, inputs));
-		//hiddens[i].print();
-	}
-	//set up weights
-	//cout << "Initializing weights from inputs to hiddens" << endl;
-	for(auto& h : hiddens) {
-		h.initWeights();
-		//h.print();
-	}
-	//cout << "Initializing weights from hiddens to inputs" << endl;
-	for(auto& n : inputs) {
-		n.initWeights();
-		//n.print();
-	}
+ANN createANN() {
+	cout << "How many input nodes?" << endl;
+	int inputs;
+	cin >> inputs;
+	cout << "How many hidden nodes?" << endl;
+	int hiddens;
+	cin >> hiddens;
+	std::string id;
+	cout << "Id/name for ANN:" << endl;
+	cin >> id;
+	ANN ann(inputs, hiddens, id);
+	ann.initializeNetwork();
+	cout << "ANN created" << endl;
+	ann.printANN(true, false);
+	return ann;
 }
 
-void setInputs(vector<neuron>& inputs, double *data, int sz) {
-	if(sz != inputs.size()) cerr << "ERROR: data and inputs size mismatch" << endl;
-	for(int i = 0; i < sz; i++) {
-		inputs[i].val = data[i];
-	}
-}
 
-double processNetwork(vector<neuron>& inputs, vector<neuron>& hiddens) {
-	//cout << "Processing from inputs to hiddens (and changing values of hiddens)" << endl;
-	for(auto& h : hiddens) {
-		h.val = h.process();	
-		//h.print();
-	}
-	//cout << "Processing from hiddens to inputs (without changing values of inputs), calculating error, and adjusting weights from hiddens to inputs" << endl;
-	int i = 0;
-	double error = 0;
-	for(auto& n : inputs) {
-		double result = n.process();
-		//cout << "Result " << i++ << ": " << result << endl; //error is abs(n.process() - n.val)
-		error += std::abs(result - n.val); //going to divide by inputs.size() later to get average error
-		//cout << "Neuron before weight adjustment: " << endl;
-		//n.print();
-		n.adjustWeights(); //adjust weights pointing to n
-		//cout << "Neuron after weight adjustment: " << endl;
-		//n.print();
-	}
-	return error / inputs.size();
-}

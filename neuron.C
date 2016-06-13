@@ -48,7 +48,7 @@ void neuron::adjustWeights() {
 		//cerr << "numAdjustments=" << w.numAdjustments << endl;
 		currentWeights[i] = weights[i].val;
 	//	cerr << "Error between value and weights[" << i << "] = " << std::abs(this->val - weights[i].pointsFromVal()) << endl;
-		weights[i].val *= (1 - std::abs(this->val - weights[i].pointsFromVal()));
+		weights[i].val *= (1 - std::abs(this->val*this->val - weights[i].pointsFromVal()*weights[i].pointsFromVal()));
 		sumNewWeights += weights[i].val;
 
 //		w.val *= w.numAdjustments;
