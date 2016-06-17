@@ -1,0 +1,2 @@
+g++ -c pixels.C -I ~/CImg/CImg-1.7.2_pre052316/
+g++ -o pixels pixels.o -O2 -L/usr/X11R6/lib -lm -lpthread -lX11

@@ -5,3 +5,8 @@ ANN
 images
 a.out
 Pixels
+image*
+*ubyte
+results*
+difference.txt
+guesses.txt

@@ -1,5 +1,5 @@
 ANN: main.o ANN.o weight.o neuron.o
-	g++ $(CFLAGS) -o ANN ANN.o main.o weight.o neuron.o -O2 -L/usr/X11R6/lib -lm -lpthread -lX11
+	g++ $(CFLAGS) -o ANN ANN.o main.o weight.o neuron.o 
 main.o: ANN.h weight.h neuron.h main.C
 	g++ $(CFLAGS) -c weight.h neuron.h ANN.h main.C
 ANN.o: ANN.h ANN.C neuron.h

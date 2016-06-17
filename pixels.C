@@ -1,9 +1,11 @@
 #include <iostream>
-#include "/root/CImg/CImg-1.7.2_pre052316/CImg.h"
+#include "CImg.h"
+#include <string>
 using namespace cimg_library;
 
 int main() {
-	CImg<unsigned char> image("fruit-salad.png");
+	std::string img = "images/fruits/training/fruit-salad.png";
+	CImg<unsigned char> image(img.c_str());
 	CImgDisplay disp(image,"Fruit salad");
 	unsigned char pixels[4000];
 	unsigned char* x = pixels;

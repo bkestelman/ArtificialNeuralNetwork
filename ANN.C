@@ -5,7 +5,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-ANN::ANN(int inputs, int hiddens, std::string id) :inputs{inputs}, hiddens{hiddens}, id{id} {}
+ANN::ANN(int inputs, int hiddens) :inputs{inputs}, hiddens{hiddens} {initializeNetwork();}
 
 void ANN::initializeNetwork() {
 	inputL.clear();
@@ -32,6 +32,10 @@ void ANN::initializeNetwork() {
 		n.initWeights();
 		//n.print();
 	}
+	for(int i = 0; i < 10; i++) {
+		errors[i] = 0;
+		numTests[i] = 0;
+	}
 }
 
 void ANN::setInputs(double *data, int sz) {
@@ -42,6 +46,20 @@ void ANN::setInputs(double *data, int sz) {
 	for(int i = 0; i < sz; i++) {
 		inputL[i].val = data[i];
 	}
+}
+
+void ANN::setInputs(char *data, int sz) {
+	for(int i = 0; i < sz; i++) {
+		inputL[i].val = (double)(unsigned char)data[i] / 255;
+		if(inputL[i].val > 1 || inputL[i].val < 0) {
+			cout << "char: " << data[i] << "\t(int)(unsigned char)char: " << (int)(unsigned char)data[i] << "\t(double)(unsigned char)char: " << (double)(unsigned char)data[i] / 255 << endl;
+			std::cerr << "ERROR: invalid input value" << std::endl;
+		}
+	}
+}
+
+void ANN::addInput(double d) {
+	inputL.push_back(neuron{d, hiddenL});
 }
 
 double ANN::processNetwork(bool adjust_weights) {
@@ -63,11 +81,18 @@ double ANN::processNetwork(bool adjust_weights) {
 		//cout << "Neuron after weight adjustment: " << endl;
 		//n.print();
 	}
+	////////
+	for(auto& h : hiddenL) {
+		double result = h.process();
+		error += std::abs(result - h.val);
+		if(adjust_weights) h.adjustWeights();
+	}
+	////////
+	//std::cout << inputL.size() << endl;
 	return error / inputL.size();
 }
 
 void ANN::printANN(bool show_node_values, bool show_weights) {
-	cout << "ANN ID: " << id << endl;
 	cout << "Inputs: " << inputs << "\tHiddens: " << hiddens << endl;
 	if(!show_node_values) return;
 	int i = 0; 

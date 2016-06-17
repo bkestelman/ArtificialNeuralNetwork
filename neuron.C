@@ -37,7 +37,7 @@ weight is divided by the sum of all the newly adjusted weights, to ensure
 their sum remains 1. To maintain a history of past adjustments, the average is 
 taken between the newly adjusted weight and all past adjusted weights (the
 initial random weight is ignored). Note that we don't need to save every past
-adjust weight, since the current weight implicitly carries the average of all
+adjusted weight, since the current weight implicitly carries the average of all
 past weights.*/ 
 void neuron::adjustWeights() {
 	double currentWeights[weights.size()];
@@ -48,7 +48,7 @@ void neuron::adjustWeights() {
 		//cerr << "numAdjustments=" << w.numAdjustments << endl;
 		currentWeights[i] = weights[i].val;
 	//	cerr << "Error between value and weights[" << i << "] = " << std::abs(this->val - weights[i].pointsFromVal()) << endl;
-		weights[i].val *= (1 - std::abs(this->val*this->val - weights[i].pointsFromVal()*weights[i].pointsFromVal()));
+		weights[i].val *= (1 - std::abs(this->val - weights[i].pointsFromVal()));
 		sumNewWeights += weights[i].val;
 
 //		w.val *= w.numAdjustments;
