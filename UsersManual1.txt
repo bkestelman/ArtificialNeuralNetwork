@@ -1,0 +1,70 @@
+User's Manual v1
+
+Guide to the Manual:
+This manual is split into three sections. 
+1. "Quick" Guide to the User Interface – ideally, the user interface should be self-explanatory, but since it is under construction,
+this section will explain what to watch out for, and suggest the basic method for creating and testing an ANN. Note you need to 
+obtain your own sets of images and follow the directory tree required by main.C. Perhaps I'll upload my image sets for now, but 
+ultimately, we should have an online database of images anyone can access. I also include an outline of my test results here. 
+2. Theory and Improvements — ideas for making the ANN more effective, and for further tests
+3. Code — a descritpion of the structure of the code
+
+1. Quick Guide to the User Interface:
+
+When you run the executable (ANN), you are prompted with a menu. Select option 1 to create an ANN. Don't bother with other options yet; 
+you will probably get a seg fault. Note there is almost no error checking implemented as of yet. 
+Indicate the number of input nodes and the number of hidden nodes. If you plan on using data from images, calculate the number of inputs 
+you need according to the size of the images. You can resize all your images quickly to a uniform size using imagemagick — the command
+to resize all files in a directory to dimensions 20x20 is
+  mogrify -resize 20x20! *
+Note this modifies the files in place, so the originals will be lost if you have not backed them up. The '!' is necessary to override the
+aspect ratio. 
+You should allow three input nodes for each pixel in an image (each pixel contains an r, g, and b value). So in the above example, I 
+would use 1200 input nodes, and any number of hidden nodes (play around with it; try 4, 40, 400, 4000). 
+Finally, give your ANN an id. This can be any string and will eventually be used to identify this specific ANN. Currently this is not 
+supported, and you may only have one ANN running at a time, so just give it any old id. 
+
+Next, you'll probably want to test your ANN. Select either or both of the options to test the ANN with the test set from animal images or
+fruit images. Look at main() in main.C to see the path where your images should be. You can either change the path in main.C, or create
+the necessary directories and move your images there (this is preferable so as not to interfere with working code if you choose to 
+commit). This will be made more flexible in the future. 
+You'll notice the outcome of these tests is a mean error reproducing inputs. With my test sets, the mean error is much smaller for the 
+animals test set than for the fruits test set, even though the ANN's weights have been randomly initialized and have not been touched. 
+This is most interesting, and suggests a crude way to classify fruits and animals by simply calculating the error in reproducing inputs:
+if the error in reproducing a given image is relatively small, it is probably an animal; relatively large, a fruit. The potential of this
+system should be investigated further, and tested on individual images. 
+
+After the initial tests, you will want to train your ANN (further tests will produce identical results as the first tests, since 
+testing does not affect the ANN's weights). Select the option to feed a training set to your ANN (currently, only a training set of 
+fruits is available, though you may wish to change this according to whatever images you have available). This prints out a bunch of
+useless junk that I'll remove by the next commit, but it does its job. 
+
+Run the test sets again after training and you'll notice improvement in the mean error in reproducing the inputs of both test sets. 
+Ideally, the improvement should be much larger for the fruits test set, though improvement is expected in both, because fruit images
+and animal images do share some similarities. From my tests, though I have not yet performed trials on a massive scale, the mean error
+in reproducing fruits does show more improvement than the mean error producing animals, considerable in percentage terms if run with a
+high number of hidden nodes (at least double every time I've run with 1000 or more hidden nodes). Unfortunately, these improvements 
+are very small, on the order of .001%. Thus, the ANN still ends up with much less error reproducing animal images than fruit images,
+rendering successful classification impossible. 
+
+
+2. Theory and Improvements
+Larger training set! If we need to get better at reproducing fruits, and feeding fruits improves reproducing fruits more than it does
+reproducing animals, feed it more fruits. Finding a database of pre-classified images is essential and officially the current top 
+priority (though not urgent; many important tests can be run with the current small image sets). 
+Adjust all weights while processing inputs, not just the final layer. Very interested to see how much this affects the ANN's error at
+reproducing inputs. 
+Add the option for more than one hidden layer. Possibly a source of improvement. 
+Consider changing the weight adjustment formula to be more drastic. Requires thought, and only necessary if we don't see enough 
+improvement after running a large training set. 
+MUST run massive tests. Comparing improvements on 1000 ANN's with various settings. Also testing if we can already classifying images
+with the previously described crude method. To illustrate this idea, I currently get roughly a mean error of 0.24 at reproducing fruits
+(before and after training), and a mean error of 0.16 at reproducing animals. So the idea is that if an ANN has an error of <0.20, we
+are probably looking at an animal, and >0.20 we are probably looking at a fruit. It would be quite amazing if we can classify images
+with a high success rate using this crude technique. And note that, if we're unable to get the error reproducing fruits smaller than 
+the error reproducing animals, we may have to use this technique to some extent after training the ANN anyways (though this would make
+me sad ):
+
+
+3. Code
+UNDER CONSTRUCTION :P

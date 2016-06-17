@@ -1,0 +1,36 @@
+Progress Report 2
+
+Big progress!
+
+Firstly, I made a simple user interface, so running the program gives a menu with options for creating an ANN and feeding it inputs. 
+Currently, the interface is quite rigid; only one ANN at a time is supported, the ANN can have only one hidden layer, the paths for 
+obtaining input images are hard-coded, and there's almost no error checking. All of this will be fixed in due time. 
+
+More interestingly, I am successfully feeding pixel data from 20x20 .png images of fruits (courtesy of Yahoo! images) to the ANN. So no
+more relying on artificial fake fruits generated from a normal distribution! I am using a training set of 77 images, and a testing set 
+of 47 images. 
+
+Results:
+If I feed the test set to a newly created ANN with randomly initialized weights, then feed it the training set, and finally feed it the
+test set once again, calculating the mean error of the ANN at reproducing inputs each time, it performs noticeably better after having 
+gone through the training set than before. This means the ANN is learning how to reproduce fruit images. 
+That's the good news. The bad news is the improvement is around a measley 0.008%. I have a hunch this won't be good enough for image 
+classification. This is also after I enhanced the weight adjustment by using the difference of squares for the error, rather than the 
+simple difference beetween the original input and the reproduced output/input. Before this change, the improvement after running
+through the training set was minimal (the last decimal point on the mean error changed after running through the training set twice; I'm 
+lucky I caught that). 
+The hopeful news is that there are several potential areas for improvement. First of all, the training set is tiny. Enlarging it is 
+probably the easiest way to improve the ANN's performance. Playing around with the size of the hidden layer also seems promising,
+typically I find a larger hidden layer performs better. Adding more hidden layers is another idea to implement, and of course, adjusting
+the weights between each layer (I'm still not adjusting the weights from the inputs to the hidden layer). 
+The real test is yet to come: to classify fruits and animals, the fruits ANN must show greater improvement at reproducing fruits than at 
+reproducing animals. So the next critical step is feeding animal images as test input to the fruits ANN and seeing how its mean error 
+there compares to its mean error for fruits. And then seeing if this is enough to identify a single image as probably an animal or
+probably a fruit. And then have 2 ANN's (one trained on fruits, one trained on animals) working alongside each other to make this 
+decision. 
+
+Another noteworthy feature: the processNetwork() function now takes a bool argument indicating whether weights should be adjusted. So
+a test set can be fed to an ANN without affecting its weights structure. 
+
+I will also add a User's Guide/Manual soon for how to use the interface to create and test your own ANN's, and also containing 
+detailed info about the code's class structure and what everything does and how it works. All in due time. 
