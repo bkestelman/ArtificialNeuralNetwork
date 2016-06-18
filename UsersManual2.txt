@@ -44,3 +44,5 @@ to a vector of the neurons connected to it (the actual vector is stored in the A
 weight.C - simply contains a value and a reference to the neuron it points to and the neuron it points from
 
 These all (except main.C) have their .h counterparts. 
+There are also some test files you don't need to worry about, but I use similar code to get certain components working in the project,
+so you may find them worth looking at. 
