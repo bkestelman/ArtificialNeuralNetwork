@@ -1,0 +1,46 @@
+User's Manual
+
+I promise this one is short and the point!
+
+Run make to compile everything
+Run ./ANN to run the MNIST digit classifier
+
+Enter 1 to create 10 RBM's. These have one layer of 28x28 (size of each image) input nodes and 10 hidden nodes (you can easily adjust 
+this number in main.C; 10 runs very fast and performs about as well as 1000. Note that larger hidden layers slow down the ANN 
+dramatically, since there are so many input nodes). 
+Enter 2 to run the test set through all the RBM's. The test set is set to 1000 images (can be adjusted easily in main.C, up to 10,000)
+This feeds each image as input to all 10 RBM's, and whichever results in the smallest error when reproducing the inputs will be the
+program's guess as to what digit was given in the image. Before running the training set, all the weights are randomly initialized, so 
+the expected success rate is 10% (although interestingly, the ANN guesses certain numbers more often than others, but this doesn't effect
+the expected success rate). 
+Enter 3 to run the training set (adjustable in main.C, up to 60,000). This will feed the training images to the RBM corresponding to
+each image's label (so an image of a '5' will be fed to RBM[5]). This may take a couple minutes, depending on the size of the 
+training set and the number of hidden nodes in your network. 
+Enter 2 to run the test set again. Be amazed at the ~70% success rate. 
+
+The program will create a .gray image file for each of the test images (.gray files are simply a list of bytes, with values 0-255, and
+no header, so you must specify their size to display them). You can display them with 
+display -size 28x28 image*
+if you have imagemagick installed. However, they will not be displayed in proper order, since they will appear image0.gray, image1.gray, 
+image10.gray, etc. So for now you have to do something like
+display -size 28x28 image0.gray image1.gray image2.gray ...
+Unless you can think of something more clever. 
+The program also creates a guesses.txt file every time you run the test set (overwriting its previous contents). This way, you can see
+the guess for each image. Pretty cool, huh?
+
+One more text file is create each time you run the test set, result[i].txt, where [i] is the ith time you have run the test set. These
+contain the mean of error of each RBM at reproducing each digit. The first 10 rows are the errors of RBM[0], etc. You can enter option 
+4 from the menu to create an additional file with the difference between result0.txt and result1.txt for one measure of how much each
+RBM improved. You'll note a couple of the RBM's improve more for numbers they weren't trained for than for the ones they were (I'm 
+looking at you, 2 and 5 grrr).  
+
+I'll make an in-depth guide to the code soon. A brief summary of its structure (which is quite simple):
+main.C - presents the menu, handles file io, etc.
+ANN.C - central class, contains two vectors of neurons (one for inputs, one for outputs), an initializeNetwork method, a setInputs, and
+a handy dandy processNetwork method, which returns the mean error in reproducing the inputs. processNetwork takes a bool adjustWeights,
+set to false for test images, true for training images. 
+neuron.C - a neuron/node has a value between 0 and 1, a vector of the weights pointing to it (which must add up to 1), and a reference 
+to a vector of the neurons connected to it (the actual vector is stored in the ANN object)
+weight.C - simply contains a value and a reference to the neuron it points to and the neuron it points from
+
+These all (except main.C) have their .h counterparts. 
