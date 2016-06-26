@@ -1,12 +1,12 @@
 #include "ANN.h"
 #include "neuron.h"
-#include "weight.h"
 #include <random>
 #include <vector>
 #include <iostream>
 #include <glob.h>
 #include <string>
 #include <fstream>
+#include <algorithm>
 using std::vector;
 using std::cout;
 using std::cin;
@@ -17,8 +17,8 @@ using std::ifstream;
 using std::ofstream;
 using std::ios;
 
-#define TEST_IMAGES 1000
-#define TRAIN_IMAGES 50000
+#define TEST_IMAGES 100
+#define TRAIN_IMAGES 5000
 #define HIDDENS 10
 
 void initRand(double *arr, int sz); //initiates normalized (between 0 and 1) random data in *arr
@@ -82,6 +82,11 @@ int main() {
 					output.write(img, 28*28);
 					//cout << "Setting inputs for anns[" << (int)label[0] << endl;
 					for(int rbm = 0; rbm < 10; rbm++) {
+						if(i == 0) {
+							anns[rbm].processNetwork(false, img);
+							ofstream inputs("reproduced_inputs" + std::to_string(rbm) + ".gray", ios::binary);
+							inputs.write(img, 28*28);
+						}
 						anns[rbm].setInputs(img, 28*28);
 						error = anns[rbm].processNetwork(false);
 						anns[rbm].numTests[(int)label[0]]++;
@@ -162,9 +167,86 @@ int main() {
 				break;
 			}
 			case 5:
-				quit = true;
+			{
+				cout << "Enter path to file: " << endl;
+				std::string path;
+				cin >> path;
+				ifstream file(path, ios::binary);
+				char img[28*28];
+				file.read(img, 28*28);
+				double smallestError = 1;
+				double error;
+				int guess;
+				ofstream readGray("readGray");
+				for(int i = 0; i < 28*28; i++) {
+					readGray << (int)(unsigned char)img[i] << endl;
+				}
+				for(int i = 0; i < 10; i++) {
+					anns[i].setInputs(img, 28*28);
+					error = anns[i].processNetwork(false);
+					if(error < smallestError) {
+						smallestError = error;
+						guess = i;
+					}
+				}
+				cout << "Guess is: " << guess << endl;
+				file.close();
+				readGray.close();
 				break;
-			default:
+			}
+			case 6:
+			{
+				cout << "Enter path to file: " << endl;
+				std::string path;
+				cin >> path;
+				ifstream file(path, ios::binary);
+				char img[28*28*3];
+				char head[54];
+				file.read(head, 54);
+				file.read(img, 3*28*28);
+				ofstream readBMP("readBMP");
+				for(int i = 0; i < 3*28*28; i++) {
+					readBMP << (int)(unsigned char)img[i] << endl;
+				}
+				double smallestError = 1;
+				double error;
+				int guess;
+				char imgG[28*28];
+				for(int i = 0; i < 28*28; i++) {
+					imgG[i] = img[i*3];
+				}
+				//std::reverse(std::begin(imgG), std::end(imgG));
+				for(int i = 0; i < 10; i++) {
+					anns[i].setInputs(imgG, 28*28);
+					error = anns[i].processNetwork(false);
+					if(error < smallestError) {
+						smallestError = error;
+						guess = i;
+					}
+				}
+				cout << "Guess is: " << guess << endl;
+				file.close();
+				readBMP.close();
+				break;
+			}
+			case 7: {
+				cout << "How many layers?\n";
+				int layers;
+				cin >> layers;
+				vector<int> layerSizes;
+				for(int i = 0; i < layers; i++) {
+					cout << "Size of layer " << i << "?\n";
+					int sz;
+					cin >> sz;
+					layerSizes.push_back(sz);
+				}
+				anns.push_back(ANN{layerSizes});
+				anns[0].initializeNetwork();
+				anns[0].printANN();
+				break;
+			}
+			case 8:
+				quit = true;
 				break;
 		}
 	}
@@ -194,11 +276,14 @@ void print(double *arr, int sz) {
 }
 
 void printMenu() {
-	cout << "1) Create 10 RBM's" << endl;
-	cout << "2) Test all RBM's" << endl;
-	cout << "3) Train RBM's" << endl;
-	cout << "4) Calculate diffs" << endl;
-	cout << "5) Quit" << endl;
+	cout << "1) Create 10 RBM's\n";
+	cout << "2) Test all RBM's\n";
+	cout << "3) Train RBM's\n";
+	cout << "4) Calculate diffs\n";
+	cout << "5) Test against custom image (.gray)\n";
+	cout << "6) Test against custom image (.bmp)\n";
+	cout << "7) Create standard ANN\n"; 
+	cout << "8) Quit" << endl;
 }
 
 ANN createANN() {
@@ -211,7 +296,7 @@ ANN createANN() {
 	ANN ann(inputs, hiddens);
 	ann.initializeNetwork();
 	cout << "ANN created" << endl;
-	ann.printANN(true, false);
+	//ann.printANN(true, false);
 	return ann;
 }
 

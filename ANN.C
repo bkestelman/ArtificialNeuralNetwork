@@ -4,8 +4,41 @@
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::vector;
 
 ANN::ANN(int inputs, int hiddens) :inputs{inputs}, hiddens{hiddens} {initializeNetwork();}
+
+ANN::ANN(vector<int> layerSizes) :inputs{0}, hiddens{0} {
+	layers.reserve(layerSizes.size());
+	layers.push_back(vector<neuron>{}); //first layer
+	for(int i = 0; i < layerSizes[0]; i++) {
+		layers[0].push_back(neuron{0});
+	}
+	cerr << "ANN::ANN: layers[0].size(): " << layers[0].size() << "\n";
+	for(int i = 1; i < layerSizes.size(); i++) {
+		layers.push_back(vector<neuron>{});
+		for(int j = 0; j < layerSizes[i]; j++) {
+			layers[i].push_back(neuron{0, layers[i-1]});
+			cerr << "ANN::ANN: layers[" << i << "][" << j << "].connections.size(): " << layers[i][j].connectionsSize() << "\n";
+			layers[i][j].initWeights();
+			cerr << "AFTER_INIT_WEIGHTS_ANN::ANN: layers[" << i << "][" << j << "].connections.size(): " << layers[i][j].connectionsSize() << "\n";
+		}
+		cerr << "ANN::ANN: layers[" << i << "].size(): " << layers[i].size() << "\n";
+	}
+	for(int i = 0; i < layers.size(); i++) {
+		cerr << "NEW___ANN::ANN: layer[" << i << "].size(): " << layers[i].size() << "\n";
+		for(int j = 0; j < layerSizes[i]; j++) {
+			cerr << "NEW___ANN::ANN: layers[" << i << "][" << j << "].connections.size(): " << layers[i][j].connectionsSize() << "\n";
+		}
+	}
+	/*for(int i = 0; i < layers.size(); i++) {
+		for(int j = 0; j < layers[i].size(); j++) {
+			cerr << "ANN::ANN: layers[" << i << "][" << j << "].connections.size(): " << layers[i][j].connectionsSize() << "\n";
+			layers[i][j].initWeights();
+		}
+	}*/
+	printANN();
+}
 
 void ANN::initializeNetwork() {
 	inputL.clear();
@@ -92,8 +125,52 @@ double ANN::processNetwork(bool adjust_weights) {
 	return error / inputL.size();
 }
 
-void ANN::printANN(bool show_node_values, bool show_weights) {
-	cout << "Inputs: " << inputs << "\tHiddens: " << hiddens << endl;
+double ANN::processNetwork(bool adjust_weights, char *outputs) {
+	//cout << "Processing from inputs to hiddens (and changing values of hiddens)" << endl;
+	for(auto& h : hiddenL) {
+		h.val = h.process(); //store the weighted average of inputs pointing to h
+		//h.print();
+	}
+	//cout << "Processing from hiddens to inputs (without changing values of inputs), calculating error, and adjusting weights from hiddens to inputs" << endl;
+	int i = 0;
+	double error = 0;
+	for(auto& n : inputL) {
+		double result = n.process(); //store the weighted average of hidden nodes pointing to n
+		cout << (int)(result*255) << ",";
+		outputs[i] = (char)(result * 255);
+		//cout << "Result " << i++ << ": " << result << endl; //error is abs(n.process() - n.val)
+		error += std::abs(result - n.val); //going to divide by inputs.size() later to get average error
+		//cout << "Neuron before weight adjustment: " << endl;
+		//n.print();
+		if(adjust_weights) n.adjustWeights(); //adjust weights pointing to n
+		//cout << "Neuron after weight adjustment: " << endl;
+		//n.print();
+		i++;
+	}
+	////////
+	for(auto& h : hiddenL) {
+		double result = h.process();
+		error += std::abs(result - h.val);
+		if(adjust_weights) h.adjustWeights();
+	}
+	////////
+	//std::cout << inputL.size() << endl;
+	return error / inputL.size();
+}
+
+void ANN::printANN() {
+	cout << "ANN with " << layers.size() << " layers:\n";
+	for(int i = 0; i < layers.size(); i++) {
+		cout << "Layer " << i << ":\n";
+		for(int j = 0; j < layers[i].size(); j++) {
+			cout << "\ti: " << i << ", j: " << j << " ";
+			layers[i][j].print();
+		}
+	}
+}
+
+void ANN::printRBM(bool show_node_values, bool show_weights) {
+/*	cout << "Inputs: " << inputs << "\tHiddens: " << hiddens << endl;
 	if(!show_node_values) return;
 	int i = 0; 
 	int j = 0;
@@ -121,9 +198,6 @@ void ANN::printANN(bool show_node_values, bool show_weights) {
 		}
 		i++;
 		j = 0;
-	}
+	}*/
 }
 
-/*void printANN(void) {
-	printANN(true);
-}*/

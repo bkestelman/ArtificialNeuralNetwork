@@ -10,3 +10,7 @@ image*
 results*
 difference.txt
 guesses.txt
+*.png
+*.jpg
+*.gray
+*.bmp

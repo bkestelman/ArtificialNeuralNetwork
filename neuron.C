@@ -5,10 +5,15 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
+vector<neuron> neuron::empty{};
+
+neuron::neuron(const double& val) :val{val}, connections{neuron::empty} {}
+
 neuron::neuron(const double& val, vector<neuron>& connections) :connections{connections}, val{val} {
 }
 
 void neuron::initWeights() {
+	cerr << "neuron::initWeights: connections.size(): " << connections.size() << "\n";
 	weights.clear();
 	double sum = 0;
 	//initialize random weights from 0 to 1
@@ -69,4 +74,8 @@ void neuron::print() {
 		cout << w.val << " ";
 	}
 	cout << endl;
+}
+
+int neuron::connectionsSize() {
+	return connections.size();
 }
